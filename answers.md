@@ -43,7 +43,7 @@ _Welcome to your Vagrant-built virtual machine._
 
 Signed up using `Datadog Recruiting Candidate` as Company, following the instructions to `install your first Datadog Agent for Ubuntu`.
 
-![Instructions to install your first Datadog Agent for Ubuntu](https://i.imgur.com/nG4CXDv.png)
+![Instructions to install your first Datadog Agent for Ubuntu](https://i.imgur.com/F6oHqeZ.png)
 
 ```shell
 The program 'curl' is currently not installed.  You can install it by typing:
