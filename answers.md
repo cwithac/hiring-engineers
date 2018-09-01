@@ -49,7 +49,7 @@ Signed up using `Datadog Recruiting Candidate` as Company, following the instruc
 The program 'curl' is currently not installed.  You can install it by typing:
 $ sudo apt-get install curl
 
-$ DD_API_KEY=c802ac74556f263f47de0d8cddd8131a bash -c "$(curl -L https://raw.githubusercontent.com/DataDog/datadog-agent/master/cmd/agent/install_script.sh)"
+$ DD_API_KEY=******************************** bash -c "$(curl -L https://raw.githubusercontent.com/DataDog/datadog-agent/master/cmd/agent/install_script.sh)"
 ```
 
 _Your first Datadog Agent is reporting._
@@ -218,8 +218,8 @@ Researched [Timeboards](https://docs.datadoghq.com/graphing/dashboards/timeboard
 Confirm access to curl and API: ![curl](https://i.imgur.com/of64Eue.png)
 
 ```shell
-$ api_key=c802ac74556f263f47de0d8cddd8131a
-$ app_key=7112e60f24aa4e28d5d8f03d51de477e7ac5ccd7
+$ api_key=********************************
+$ app_key=********************************
 ```
 ```json
 $ curl  -X POST -H "Content-type: application/json" \
