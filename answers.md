@@ -13,7 +13,9 @@
 ##### Datadog and Agent Reporting Metrics
 
 ```shell
-$ DD_API_KEY=***** bash -c "$(curl -L https://raw.githubusercontent.com/DataDog/datadog-agent/master/cmd/agent/install_script.sh)"
+$ DD_API_KEY=<YOUR-API-KEY> bash -c "$(curl -L https://raw.githubusercontent.com/DataDog/datadog-agent/master/cmd/agent/install_script.sh)"
+
+$ sudo service datadog-agent restart
 ```
 
 <hr>
@@ -23,26 +25,136 @@ $ DD_API_KEY=***** bash -c "$(curl -L https://raw.githubusercontent.com/DataDog/
 > Add tags in the Agent config file and show us a screenshot of your host and its tags on the Host Map page in Datadog.
 
 ```shell
-  $ sudo vi /etc/datadog-agent/datadog.yaml
+  $ sudo nano /etc/datadog-agent/datadog.yaml
   $ sudo service datadog-agent restart
 ```
 
-```
+```yaml
 # Set the host's tags (optional)
-tags:
+tags: os:high_sierra, year:2013
 ```
 
 > Install a database on your machine (MongoDB, MySQL, or PostgreSQL) and then install the respective Datadog integration for that database.
 
+```shell
+$ sudo apt-get update
+$ sudo apt-get install mysql-server
+$ sudo ufw allow mysql
+$ sudo systemctl start mysql
+$ sudo systemctl enable mysql
+$ /usr/bin/mysql -u root -p
+```
+```sql
+CREATE USER 'datadog'@'localhost' IDENTIFIED BY '<PASSWORD>';
+GRANT REPLICATION CLIENT ON *.* TO 'datadog'@'localhost' WITH MAX_USER_CONNECTIONS 5;
+GRANT PROCESS ON *.* TO 'datadog'@'localhost';
+GRANT SELECT ON performance_schema.* TO 'datadog'@'localhost';
+```
+
+```shell
+$ mysql -u datadog --password='<PASSWORD>' -e "show status" | \
+grep Uptime && echo -e "\033[0;32mMySQL user - OK\033[0m" || \
+echo -e "\033[0;31mCannot connect to MySQL\033[0m"
+mysql -u datadog --password='<PASSWORD>' -e "show slave status" && \
+echo -e "\033[0;32mMySQL grant - OK\033[0m" || \
+echo -e "\033[0;31mMissing REPLICATION CLIENT grant\033[0m"
+
+MySQL PROCESS grant - OK
+
+$ mysql -u datadog --password='<PASSWORD>' -e "SELECT * FROM performance_schema.threads" && \
+echo -e "\033[0;32mMySQL SELECT grant - OK\033[0m" || \
+echo -e "\033[0;31mMissing SELECT grant\033[0m"
+mysql -u datadog --password='<PASSWORD>' -e "SELECT * FROM INFORMATION_SCHEMA.PROCESSLIST" && \
+echo -e "\033[0;32mMySQL PROCESS grant - OK\033[0m" || \
+echo -e "\033[0;31mMissing PROCESS grant\033[0m"
+
+MySQL PROCESS grant - OK
+
+$ sudo mv /etc/datadog-agent/conf.d/mysql.d/conf.yaml.example /etc/datadog-agent/conf.d/mysql.d/conf.yaml
+$ sudo nano /etc/datadog-agent/conf.d/mysql.d/conf.yaml
+```
+
+```yaml
+init_config:
+
+instances:
+  - server: localhost
+    user: datadog
+    pass: <PASSWORD>
+    tags:
+        - testing_db
+        - testing_mysql
+    options:
+        replication: 0
+        galera_cluster: 1
+```
+
+```shell
+$ sudo service datadog-agent restart
+
+$ sudo datadog-agent status
+
+=========
+Collector
+=========
+
+  Running Checks
+  ==============
+
+    mysql (1.3.0)
+    -------------
+      Total Runs: 2
+      [...]
+```
 
 > Create a custom Agent check that submits a metric named my_metric with a random value between 0 and 1000.
 
+```shell
+$ sudo touch /etc/datadog-agent/conf.d/my_metric.yaml
+$ sudo nano /etc/datadog-agent/conf.d/my_metric.yaml
+```
+
+```yaml
+init_config:
+
+instances:
+  [{}]
+```
+
+```shell
+$ sudo touch /etc/datadog-agent/checks.d/my_metric.py
+$ sudo nano /etc/datadog-agent/checks.d/my_metric.py
+```
+
+```python
+from checks import AgentCheck
+import random
+
+class MyMetric(AgentCheck):
+  def check(self, instance):
+    self.gauge('my_metric', random.randint(0,1000))
+```
+
+```shell
+$ sudo service datadog-agent restart
+```
 
 > Change your check's collection interval so that it only submits the metric once every 45 seconds.
 
+```shell
+$ sudo nano /etc/datadog-agent/conf.d/my_metric.yaml
+```
 
-> Bonus Question Can you change the collection interval without modifying the Python check file you created?
+```yaml
+init_config:
 
+instances:
+    -   min_collection_interval: 45
+```
+
+```shell
+$ sudo service datadog-agent restart
+```
 
 <hr>
 
