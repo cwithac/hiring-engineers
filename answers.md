@@ -13,7 +13,7 @@
 ##### Datadog and Agent Reporting Metrics
 
 ```shell
-$ DD_API_KEY=<YOUR-API-KEY> bash -c "$(curl -L https://raw.githubusercontent.com/DataDog/datadog-agent/master/cmd/agent/install_script.sh)"
+$ DD_API_KEY=<YOUR_API_KEY> bash -c "$(curl -L https://raw.githubusercontent.com/DataDog/datadog-agent/master/cmd/agent/install_script.sh)"
 
 $ sudo service datadog-agent restart
 ```
@@ -162,17 +162,72 @@ $ sudo service datadog-agent restart
 
 > Utilize the Datadog API to create a Timeboard that contains:
 > - Your custom metric scoped over your host.
-
 > - Any metric from the Integration on your Database with the anomaly function applied.
-
 > - Your custom metric with the rollup function applied to sum up all the points for the past hour into one bucket
 
-> Once this is created, access the Dashboard from your Dashboard List in the UI:
-> - Set the Timeboard's timeframe to the past 5 minutes
+```shell
+$ curl "https://api.datadoghq.com/api/v1/validate?api_key=<YOUR_API_KEY>"
 
-> - Take a snapshot of this graph and use the @ notation to send it to yourself.
+{"valid":true}
 
-> - Bonus Question: What is the Anomaly graph displaying?
+$ api_key=<YOUR_API_KEY>
+$ app_key=<YOUR_APPLICATION_KEY>
+
+$ curl  -X POST -H "Content-type: application/json" \
+-d '{
+      "graphs" : [
+      {
+          "title": "scoped over host",
+          "definition": {
+              "events": [],
+              "requests": [
+                {"q": "avg:my_metric{*}"}
+              ]
+          },
+          "viz": "timeseries"
+      },
+      {
+          "title": "integration of database with anomaly function applied",
+          "definition": {
+              "events": [],
+              "requests": [
+                {"q": "avg:mysql.performance.bytes_sent{*}"}
+              ]
+          },
+          "viz": "timeseries"
+      },
+      {
+          "title": "rollup function applied",
+          "definition": {
+              "events": [],
+              "requests": [
+                {"q": "avg:my_metric{*}.rollup(sum, 3600)"}
+              ]
+          },
+          "viz": "timeseries"
+      }
+      ],
+      "title" : "My_Metric Timeboard 2.0",
+      "description" : "A dashboard with my_metric custom agent.",
+      "template_variables": [{
+          "name": "host1",
+          "prefix": "host",
+          "default": "host:my-host"
+      }],
+      "read_only": "True"
+}' \
+"https://api.datadoghq.com/api/v1/dash?api_key=${api_key}&application_key=${app_key}"
+
+{"dash":{"read_only":true,"graphs":[{"definition":{"requests":[{"q":"avg:my_metric{*}"}],"events":[]},"title":"scoped over host"},{"definition":{"requests":[{"q":"avg:mysql.performance.bytes_sent{*}"}],"events":[]},"title":"integration of database with anomaly function applied"},{"definition":{"requests":[{"q":"avg:my_metric{*}.rollup(sum, 3600)"}],"events":[]},"title":"rollup function applied"}],"template_variables":[{"default":"host:my-host","prefix":"host","name":"host1"}],"description":"A dashboard with my_metric custom agent.","title":"My_Metric Timeboard 2.0","created":"2018-09-09T15:10:09.038293+00:00","id":910540,"created_by":{"disabled":false,"handle":"cathleenmwright@gmail.com","name":"Cathleen Wright","is_admin":true,"role":"Administrator","access_role":"adm","verified":true,"email":"cathleenmwright@gmail.com","icon":"https://secure.gravatar.com/avatar/127e2966bc2d20469f81fdf522092c56?s=48&d=retro"},"modified":"2018-09-09T15:10:09.198323+00:00"},"url":"/dash/910540/mymetric-timeboard-20","resource":"/api/v1/dash/910540"}
+```
+
+```json
+{"errors": ["Error parsing query: unable to parse anomalies(avg:mysql.performance.bytes_sent{*}, basic, 2): Rule 'scope_expr' didn't match at ', 2)' (line 1, column 53)."]}
+
+"requests": [
+    {"q": "anomalies(avg:mysql.performance.bytes_sent{*}, 'basic', 2)"}
+  ]
+```
 
 <hr>
 
