@@ -221,6 +221,8 @@ $ curl  -X POST -H "Content-type: application/json" \
 {"dash":{"read_only":true,"graphs":[{"definition":{"requests":[{"q":"avg:my_metric{*}"}],"events":[]},"title":"scoped over host"},{"definition":{"requests":[{"q":"avg:mysql.performance.bytes_sent{*}"}],"events":[]},"title":"integration of database with anomaly function applied"},{"definition":{"requests":[{"q":"avg:my_metric{*}.rollup(sum, 3600)"}],"events":[]},"title":"rollup function applied"}],"template_variables":[{"default":"host:my-host","prefix":"host","name":"host1"}],"description":"A dashboard with my_metric custom agent.","title":"My_Metric Timeboard 2.0","created":"2018-09-09T15:10:09.038293+00:00","id":910540,"created_by":{"disabled":false,"handle":"cathleenmwright@gmail.com","name":"Cathleen Wright","is_admin":true,"role":"Administrator","access_role":"adm","verified":true,"email":"cathleenmwright@gmail.com","icon":"https://secure.gravatar.com/avatar/127e2966bc2d20469f81fdf522092c56?s=48&d=retro"},"modified":"2018-09-09T15:10:09.198323+00:00"},"url":"/dash/910540/mymetric-timeboard-20","resource":"/api/v1/dash/910540"}
 ```
 
+[Anomaly Monitors via the API](https://docs.datadoghq.com/monitors/monitor_types/anomaly/#anomaly-monitors-via-the-api) - _Note: that anomaly detection monitors may only be used by enterprise-level customer subscriptions. If you have a pro-level customer subscription and would like to use the anomaly detection monitoring feature, you can reach out to your customer success representative or email the Datadog billing team to discuss that further._
+
 ```json
 {"errors": ["Error parsing query: unable to parse anomalies(avg:mysql.performance.bytes_sent{*}, basic, 2): Rule 'scope_expr' didn't match at ', 2)' (line 1, column 53)."]}
 
