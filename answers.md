@@ -218,7 +218,7 @@ $ curl  -X POST -H "Content-type: application/json" \
 }' \
 "https://api.datadoghq.com/api/v1/dash?api_key=${api_key}&application_key=${app_key}"
 
-{"dash":{"read_only":true,"graphs":[{"definition":{"requests":[{"q":"avg:my_metric{*}"}],"events":[]},"title":"scoped over host"},{"definition":{"requests":[{"q":"avg:mysql.performance.bytes_sent{*}"}],"events":[]},"title":"integration of database with anomaly function applied"},{"definition":{"requests":[{"q":"avg:my_metric{*}.rollup(sum, 3600)"}],"events":[]},"title":"rollup function applied"}],"template_variables":[{"default":"host:my-host","prefix":"host","name":"host1"}],"description":"A dashboard with my_metric custom agent.","title":"My_Metric Timeboard 2.0","created":"2018-09-09T15:10:09.038293+00:00","id":910540,"created_by":{"disabled":false,"handle":"cathleenmwright@gmail.com","name":"Cathleen Wright","is_admin":true,"role":"Administrator","access_role":"adm","verified":true,"email":"cathleenmwright@gmail.com","icon":"https://secure.gravatar.com/avatar/127e2966bc2d20469f81fdf522092c56?s=48&d=retro"},"modified":"2018-09-09T15:10:09.198323+00:00"},"url":"/dash/910540/mymetric-timeboard-20","resource":"/api/v1/dash/910540"}
+{"dash":{"read_only":true,"graphs":[{"definition":{"requests":[{"q":"avg:my_metric{*}"}],"events":[]},"title":"scoped over host"},{"definition":{"requests":[{"q":"avg:mysql.performance.bytes_sent{*}"}],"events":[]},"title":"integration of database with anomaly function applied"},{"definition":{"requests":[{"q":"avg:my_metric{*}.rollup(sum, 3600)"}],"events":[]},"title":"rollup function applied"}],"template_variables":[{"default":"host:my-host","prefix":"host","name":"host1"}],"description":"A dashboard with my_metric custom agent.","title":"My_Metric Timeboard 2.0","created":"<DATETIME REDACTED>","id":910540,"created_by":{"disabled":false,"handle":"cathleenmwright@gmail.com","name":"Cathleen Wright","is_admin":true,"role":"Administrator","access_role":"adm","verified":true,"email":"cathleenmwright@gmail.com","icon":"https://secure.gravatar.com/avatar/127e2966bc2d20469f81fdf522092c56?s=48&d=retro"},"modified":"<DATETIME REDACTED>"},"url":"/dash/910540/mymetric-timeboard-20","resource":"/api/v1/dash/910540"}
 ```
 
 [Anomaly Monitors via the API](https://docs.datadoghq.com/monitors/monitor_types/anomaly/#anomaly-monitors-via-the-api) - _Note: that anomaly detection monitors may only be used by enterprise-level customer subscriptions. If you have a pro-level customer subscription and would like to use the anomaly detection monitoring feature, you can reach out to your customer success representative or email the Datadog billing team to discuss that further._
@@ -241,6 +241,8 @@ Given the following Flask app (or any Python/Ruby/Go app of your choice) instrum
 <p>
 
 ```python
+# /etc/datadog-agent/my_app.py
+
 from flask import Flask
 import logging
 import sys
@@ -273,13 +275,79 @@ if __name__ == '__main__':
 
 </p>
 
-> Note: Using both ddtrace-run and manually inserting the Middleware has been known to cause issues. Please only use one or the other.
-
 </details>
 
-> Bonus Question: What is the difference between a Service and a Resource?
+```yaml
+# /etc/datadog-agent/datadog.yaml
 
-> Provide a link and a screenshot of a Dashboard with both APM and Infrastructure Metrics.
-> Please include your fully instrumented app in your submission, as well.
+apm_config:
+#   Whether or not the APM Agent should run
+ enabled: true
+```
 
-<hr>
+```shell
+$ sudo apt-get update
+$ sudo apt install python3-pip
+$ pip3 install ddtrace
+$ pip3 install flask
+$ sudo service datadog-agent restart
+$ ddtrace-run python3 my_app.py
+
+DEBUG:ddtrace.contrib.flask.middleware:flask: initializing trace middleware
+<DATETIME REDACTED> - ddtrace.contrib.flask.middleware - DEBUG - flask: initializing trace middleware
+DEBUG:ddtrace.writer:resetting queues. pids(old:None new:2310)
+<DATETIME REDACTED> - ddtrace.writer - DEBUG - resetting queues. pids(old:None new:2310)
+DEBUG:ddtrace.writer:starting flush thread
+<DATETIME REDACTED> - ddtrace.writer - DEBUG - starting flush thread
+ * Serving Flask app "my_app" (lazy loading)
+ * Environment: production
+   WARNING: Do not use the development server in a production environment.
+   Use a production WSGI server instead.
+ * Debug mode: off
+INFO:werkzeug: * Running on http://0.0.0.0:5050/ (Press CTRL+C to quit)
+<DATETIME REDACTED> - werkzeug - INFO -  * Running on http://0.0.0.0:5050/ (Press CTRL+C to quit)
+DEBUG:ddtrace.api:reported 1 services
+<DATETIME REDACTED> - ddtrace.api - DEBUG - reported 1 services
+[...]
+
+$ curl http://127.0.0.1:5050/
+Entrypoint to the Application
+$ curl http://127.0.0.1:5050/api/apm
+Getting APM Started
+$ curl http://127.0.0.1:5050/api/trace
+Posting Traces
+
+INFO:werkzeug:127.0.0.1 - - [<DATETIME REDACTED>] "GET / HTTP/1.1" 200 -
+<DATETIME REDACTED> - werkzeug - INFO - 127.0.0.1 - - [<DATETIME REDACTED>] "GET / HTTP/1.1" 200 -
+DEBUG:ddtrace.api:reported 1 traces in 0.00134s
+<DATETIME REDACTED> - ddtrace.api - DEBUG - reported 1 traces in 0.00134s
+INFO:werkzeug:127.0.0.1 - - [<DATETIME REDACTED>] "GET /api/apm HTTP/1.1" 200 -
+<DATETIME REDACTED> - werkzeug - INFO - 127.0.0.1 - - [<DATETIME REDACTED>] "GET /api/apm HTTP/1.1" 200 -
+DEBUG:ddtrace.api:reported 1 traces in 0.00137s
+<DATETIME REDACTED> - ddtrace.api - DEBUG - reported 1 traces in 0.00137s
+INFO:werkzeug:127.0.0.1 - - [<DATETIME REDACTED>] "GET /api/trace HTTP/1.1" 200 -
+<DATETIME REDACTED> - werkzeug - INFO - 127.0.0.1 - - [<DATETIME REDACTED>] "GET /api/trace HTTP/1.1" 200 -
+DEBUG:ddtrace.api:reported 1 traces in 0.00130s
+<DATETIME REDACTED> - ddtrace.api - DEBUG - reported 1 traces in 0.00130s
+```
+
+```yaml
+# /etc/datadog-agent/datadog.yaml
+
+apm_config:
+#   Whether or not the APM Agent should run
+ enabled: true
+ analyzed_spans:
+    flask|flask.request: 1
+```
+
+```shell
+sudo service datadog-agent restart
+```
+
+![APM](https://i.imgur.com/pKqiuyx.png?1)
+
+- [Tracing Python Applications](https://docs.datadoghq.com/tracing/setup/python/)
+- [Flask](http://pypi.datadoghq.com/trace/docs/web_integrations.html#flask)
+- [Datadog Python Trace Client](http://pypi.datadoghq.com/trace/docs/#module-ddtrace.contrib.flask)
+- [APM Setup](https://docs.datadoghq.com/tracing/setup/)
